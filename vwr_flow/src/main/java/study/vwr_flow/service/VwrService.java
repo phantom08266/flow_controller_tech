@@ -40,4 +40,10 @@ public class VwrService {
                 .defaultIfEmpty(-1L)
                 .map(rank -> rank >= 0);
     }
+
+    public Mono<Long> getRank(String queueName, Long userId) {
+        return reactiveRedisTemplate.opsForZSet().rank(USER_QUEUE.formatted(queueName), userId.toString())
+                .defaultIfEmpty(-1L)
+                .map(rank -> rank >= 0 ? rank + 1 : rank);
+    }
 }

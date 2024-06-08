@@ -10,6 +10,7 @@ import reactor.core.publisher.Mono;
 import study.vwr_flow.controller.dto.CreateVwrResponse;
 import study.vwr_flow.controller.dto.ProceedResponse;
 import study.vwr_flow.controller.dto.ProceedUserResponse;
+import study.vwr_flow.exception.RankResponse;
 import study.vwr_flow.service.VwrService;
 
 @RestController
@@ -37,5 +38,12 @@ public class VwrController {
                                                @RequestParam final Long userId) {
         return vwrService.isProceed(queueName, userId)
                 .map(ProceedUserResponse::new);
+    }
+
+    @GetMapping("/rank")
+    public Mono<RankResponse> getRank(@RequestParam(required = false) final String queueName,
+                                      @RequestParam final Long userId) {
+        return vwrService.getRank(queueName, userId)
+                .map(RankResponse::new);
     }
 }
