@@ -19,22 +19,22 @@ public class VwrController {
     private final VwrService vwrService;
 
     @PostMapping
-    public Mono<?> register(@RequestParam final Long userId,
-                            @RequestParam(required = false) final String queueName) {
+    public Mono<CreateVwrResponse> register(@RequestParam(required = false) final String queueName,
+                                            @RequestParam final Long userId) {
         return vwrService.registerVwrQueue(queueName, userId)
                 .map(CreateVwrResponse::new);
     }
 
     @PostMapping("/proceed")
-    public Mono<?> proceed(@RequestParam(required = false) final String queueName,
-                           @RequestParam final long count) {
+    public Mono<ProceedResponse> proceed(@RequestParam(required = false) final String queueName,
+                                         @RequestParam final long count) {
         return vwrService.proceedVwrQueue(queueName, count)
                 .map(proceedCount -> new ProceedResponse(count, proceedCount));
     }
 
     @GetMapping("/proceed")
-    public Mono<?> isProceed(@RequestParam(required = false) final String queueName,
-                             @RequestParam final Long userId) {
+    public Mono<ProceedUserResponse> isProceed(@RequestParam(required = false) final String queueName,
+                                               @RequestParam final Long userId) {
         return vwrService.isProceed(queueName, userId)
                 .map(ProceedUserResponse::new);
     }
