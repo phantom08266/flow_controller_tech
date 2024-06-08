@@ -4,3 +4,8 @@ server:
 spring:
   application:
     name: vwr_flow
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
