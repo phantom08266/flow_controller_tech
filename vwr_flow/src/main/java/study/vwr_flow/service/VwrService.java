@@ -38,14 +38,16 @@ public class VwrService {
 
     // proceed한 키인지 확인한다.
     public Mono<Boolean> isProceed(final String queueName, final Long userId) {
+
         return reactiveRedisTemplate.opsForZSet().rank(USER_PROCEED_QUEUE.formatted(queueName), userId.toString())
                 .defaultIfEmpty(-1L)
                 .map(rank -> rank >= 0);
     }
 
     public Mono<Boolean> isProceedByToken(final String queueName, final Long userId, final String token) {
+        isEnable(queueName, userId, token);
         return generateToken(queueName, userId)
-                .filter(expectToken -> expectToken.equals(token))
+                .filter(expectToken -> expectToken.equalsIgnoreCase(token))
                 .map(expectToken -> true)
                 .defaultIfEmpty(false);
     }
@@ -54,6 +56,24 @@ public class VwrService {
         return reactiveRedisTemplate.opsForZSet().rank(USER_QUEUE.formatted(queueName), userId.toString())
                 .defaultIfEmpty(-1L)
                 .map(rank -> rank >= 0 ? rank + 1 : rank);
+    }
+
+    public boolean isEnable(String queueName, Long userId, String token) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            String input = "user-queue-%s-%d".formatted(queueName, userId);
+            byte[] byteData = digest.digest(input.getBytes(StandardCharsets.UTF_8));
+
+            StringBuilder sb = new StringBuilder();
+            for (byte b : byteData) {
+                sb.append(String.format("%02x", b));
+            }
+            boolean result = sb.toString().equals(token);
+            System.out.println(result);
+            return result;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public Mono<String> generateToken(String queueName, Long userId) {

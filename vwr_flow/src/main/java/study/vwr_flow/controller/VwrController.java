@@ -45,6 +45,14 @@ public class VwrController {
                 .map(ProceedUserResponse::new);
     }
 
+    @GetMapping("/proceed-token")
+    public Mono<ProceedUserResponse> isProceedByToken(@RequestParam(required = false) final String queueName,
+                                                      @RequestParam final Long userId,
+                                                      @RequestParam final String token) {
+        return vwrService.isProceedByToken(queueName, userId, token)
+                .map(ProceedUserResponse::new);
+    }
+
     @GetMapping("/rank")
     public Mono<RankResponse> getRank(@RequestParam(required = false) final String queueName,
                                       @RequestParam final Long userId) {

@@ -1,6 +1,7 @@
 package study.vwr_flow.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpCookie;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,6 +11,7 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 import study.vwr_flow.service.VwrService;
 
+@Slf4j
 @Controller
 @RequiredArgsConstructor
 public class WaitingRoomController {
@@ -21,9 +23,12 @@ public class WaitingRoomController {
                                @RequestParam Long userId,
                                @RequestParam String redirectUrl,
                                ServerWebExchange exchange) {
+        log.info("queueName: {}, userId: {}, redirectUrl: {}", queueName, userId, redirectUrl);
+
         String tokenKey = "user-queue-%s-%d".formatted(queueName, userId);
         HttpCookie cookie = exchange.getRequest().getCookies().getFirst(tokenKey);
         String cookieValue = cookie != null ? cookie.getValue() : "";
+        log.info("cookieValue: {}", cookieValue);
 
         return vwrService.isProceedByToken(queueName, userId, cookieValue)
                 .filter(isProceed -> isProceed)

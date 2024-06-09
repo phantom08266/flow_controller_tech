@@ -19,7 +19,7 @@ public class VwrScheduleService {
 
     private static final String USER_QUEUE_KEY_SCAN = "user:queue:*:wait";
     private static final int SCAN_MAX_COUNT = 100;
-    private static final int PROCEED_COUNT = 5;
+    private static final int PROCEED_COUNT = 100;
 
     private final ReactiveRedisTemplate<String, String> reactiveRedisTemplate;
     private final VwrService vwrService;
