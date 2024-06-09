@@ -1,5 +1,6 @@
 package study.vwr_flow.controller;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -17,6 +18,7 @@ import study.vwr_flow.config.EmbeddedRedisConfig;
 import study.vwr_flow.controller.dto.CreateVwrResponse;
 import study.vwr_flow.controller.dto.ProceedResponse;
 import study.vwr_flow.controller.dto.ProceedUserResponse;
+import study.vwr_flow.exception.RankResponse;
 import study.vwr_flow.exception.ServiceException;
 import study.vwr_flow.service.VwrService;
 
@@ -84,6 +86,16 @@ class VwrControllerTest {
                                 .then(vwrController.proceed("test", 1L))
                                 .then(vwrController.isProceed("test", 1L)))
                 .expectNext(new ProceedUserResponse(true))
+                .verifyComplete();
+    }
+
+    @Test
+    void getRankTest() {
+        StepVerifier.create(
+                        vwrController.register("test", 1L)
+                                .then(vwrController.getRank("test", 1L))
+                )
+                .expectNext(new RankResponse(1L))
                 .verifyComplete();
     }
 }
