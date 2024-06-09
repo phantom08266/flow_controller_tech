@@ -1,11 +1,15 @@
 package study.vwr_flow.controller;
 
+import java.time.Duration;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseCookie;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 import study.vwr_flow.controller.dto.CreateVwrResponse;
 import study.vwr_flow.controller.dto.ProceedResponse;
@@ -13,6 +17,7 @@ import study.vwr_flow.controller.dto.ProceedUserResponse;
 import study.vwr_flow.exception.RankResponse;
 import study.vwr_flow.service.VwrService;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/vwr")
@@ -45,5 +50,21 @@ public class VwrController {
                                       @RequestParam final Long userId) {
         return vwrService.getRank(queueName, userId)
                 .map(RankResponse::new);
+    }
+
+    @GetMapping("/token")
+    public Mono<String> generateToken(@RequestParam(required = false) final String queueName,
+                                      @RequestParam final Long userId,
+                                      ServerWebExchange exchange) {
+        return Mono.defer(() -> vwrService.generateToken(queueName, userId))
+                .map(token -> {
+                    exchange.getResponse().addCookie(
+                            ResponseCookie.from("user-queue-%s-%d".formatted(queueName, userId), token)
+                                    .maxAge(Duration.ofSeconds(300))
+                                    .path("/")
+                                    .build()
+                    );
+                    return token;
+                });
     }
 }

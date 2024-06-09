@@ -1,5 +1,7 @@
 package study.vwr_flow.service;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.time.Instant;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
@@ -41,9 +43,32 @@ public class VwrService {
                 .map(rank -> rank >= 0);
     }
 
+    public Mono<Boolean> isProceedByToken(final String queueName, final Long userId, final String token) {
+        return generateToken(queueName, userId)
+                .filter(expectToken -> expectToken.equals(token))
+                .map(expectToken -> true)
+                .defaultIfEmpty(false);
+    }
+
     public Mono<Long> getRank(String queueName, Long userId) {
         return reactiveRedisTemplate.opsForZSet().rank(USER_QUEUE.formatted(queueName), userId.toString())
                 .defaultIfEmpty(-1L)
                 .map(rank -> rank >= 0 ? rank + 1 : rank);
+    }
+
+    public Mono<String> generateToken(String queueName, Long userId) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            String input = "user-queue-%s-%d".formatted(queueName, userId);
+            byte[] byteData = digest.digest(input.getBytes(StandardCharsets.UTF_8));
+
+            StringBuilder sb = new StringBuilder();
+            for (byte b : byteData) {
+                sb.append(String.format("%02x", b));
+            }
+            return Mono.just(sb.toString());
+        } catch (Exception e) {
+            return Mono.error(VwrServiceErrorType.ALREADY_ADD_VWR.build());
+        }
     }
 }

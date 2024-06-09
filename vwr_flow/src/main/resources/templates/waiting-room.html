@@ -14,6 +14,7 @@
             align-items: center;
             height: 100vh;
         }
+
         .message {
             text-align: center;
             padding: 20px;
@@ -42,13 +43,16 @@
         fetch('/api/v1/vwr/rank?' + queryParam)
             .then(response => response.json())
             .then(data => {
-                if(data.rank < 0) {
-                    document.querySelector('#number').innerHTML = 0;
-                    document.querySelector('#updated').innerHTML = new Date();
+                if (data.rank < 0) {
+                    fetch('/api/v1/vwr/token?' + queryParam)
+                        .then(response => {
+                            document.querySelector('#number').innerHTML = 0;
+                            document.querySelector('#updated').innerHTML = new Date();
 
-                    const newUrl = window.location.origin + window.location.pathname + window.location.search;
-                    console.log('Redirect to: ' + newUrl);
-                    window.location.href = newUrl;
+                            const newUrl = window.location.origin + window.location.pathname + window.location.search;
+                            // alert('새로운 경로 : ' + newUrl);
+                            window.location.href = newUrl;
+                        }).catch(error => console.error(error));
                     return;
                 }
                 document.querySelector('#number').innerHTML = data.rank;
